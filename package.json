@@ -1,0 +1,14 @@
+{
+  "name": "ravharrar-modern",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cours de Torah du Rav Yaacov B. Harrar — static bilingual lessons site",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "test": "node --test",
+    "build-data": "node --use-system-ca scripts/build-data.js",
+    "crawl-oldsite": "node --use-system-ca scripts/crawl-oldsite.js",
+    "serve": "node scripts/serve.js"
+  }
+}

@@ -1,0 +1,71 @@
+# Every 3 hours: pull new lessons from the YouTube channel, save them, and publish the site.
+# If YouTube blocks the refresh, the last good data stays and the site is published unchanged.
+name: Update lessons and deploy
+
+on:
+  schedule:
+    - cron: "17 */3 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: update-and-deploy
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Tests
+        run: node --test
+
+      - name: Refresh lessons from YouTube
+        id: refresh
+        continue-on-error: true
+        run: npm run build-data
+
+      - name: Save new lessons
+        if: steps.refresh.outcome == 'success'
+        run: |
+          if git diff --quiet -- data/; then
+            echo "No new lessons."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/
+            git commit -m "data: refresh lessons from YouTube"
+            git push
+          fi
+
+      - name: Prepare site files
+        run: |
+          mkdir -p _site/scripts/lib
+          cp -r index.html config.js css js i18n data _site/
+          [ -d assets ] && cp -r assets _site/ || true
+          cp scripts/lib/taxonomy.js _site/scripts/lib/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: update
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
