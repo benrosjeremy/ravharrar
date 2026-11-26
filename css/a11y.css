@@ -1,0 +1,63 @@
+/* Accessibility toolbar and the reader's display settings (classes set on <html> by js/a11y.js). */
+.a11y { position: relative; }
+#a11y-toggle { padding-inline: 8px; }
+#a11y-toggle[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
+.a11y__panel {
+  position: absolute; z-index: 40; inset-block-start: calc(100% + 8px); inset-inline-end: 0;
+  inline-size: min(290px, calc(100vw - 32px)); padding: 14px; display: flex; flex-direction: column; gap: 8px;
+  background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow);
+}
+.a11y__title { margin: 0 0 2px; font-family: var(--font-display); font-weight: 700; font-size: var(--step-1); }
+.a11y__size { display: flex; align-items: center; gap: 8px; padding-block-end: 6px; border-block-end: 1px solid var(--line); }
+.a11y__size span { margin-inline-end: auto; font-weight: 600; }
+.a11y__size output { min-inline-size: 3.2em; text-align: center; font-variant-numeric: tabular-nums; }
+.a11y__size button, .a11y__opt, .a11y__reset {
+  border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 10px; cursor: pointer; font-weight: 600;
+}
+.a11y__size button { inline-size: 40px; block-size: 40px; }
+.a11y__size button:disabled { opacity: .45; cursor: default; }
+.a11y__opt { padding: 10px 12px; text-align: start; display: flex; align-items: center; gap: 10px; }
+.a11y__opt::before {
+  content: ""; inline-size: 18px; block-size: 18px; border-radius: 5px; border: 2px solid var(--muted); flex: none;
+}
+.a11y__opt[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.a11y__opt[aria-pressed="true"]::before {
+  border-color: var(--accent); background: var(--accent)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/%3E%3C/svg%3E") center / 14px no-repeat;
+}
+.a11y__foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-block-start: 4px; flex-wrap: wrap; }
+.a11y__reset { padding: 8px 12px; }
+.a11y__foot a { font-weight: 600; }
+
+/* High contrast: black on white, one strong blue, everything outlined. */
+html.a11y-contrast:root {
+  --bg: #ffffff; --surface: #ffffff; --surface-2: #ffffff; --ink: #000000; --muted: #000000; --line: #000000;
+  --accent: #0030a0; --accent-soft: #ffffff; --on-accent: #ffffff; --gold: #6b4a00; --gold-soft: #ffffff;
+  --hero-bg: #000000; --hero-ink: #ffffff; --hero-muted: #ffffff; --hero-accent: #ffff66; --hero-gold: #ffff66;
+  --shadow: none; color-scheme: light;
+}
+html.a11y-contrast .hero-band { background: var(--hero-bg); }
+html.a11y-contrast .hero-band::before { display: none; }
+html.a11y-contrast .card, html.a11y-contrast .chip, html.a11y-contrast .tool { border: 1px solid #000; }
+html.a11y-contrast :focus-visible { outline: 3px solid #000; box-shadow: 0 0 0 6px #ffff66; }
+
+/* Underline and mark every link. */
+html.a11y-links a { text-decoration: underline !important; text-underline-offset: 3px; text-decoration-thickness: 2px; }
+html.a11y-links a:not(.card a, .btn, .brand) { font-weight: 700; }
+
+/* Readable font: plain sans-serif, more space between letters and lines. */
+html.a11y-readable:root { --font-display: Arial, "Arial Hebrew", Helvetica, sans-serif; --font-body: Arial, "Arial Hebrew", Helvetica, sans-serif; }
+html.a11y-readable body { line-height: 1.75; letter-spacing: .02em; word-spacing: .08em; }
+
+/* Stop every animation and transition. */
+html.a11y-still *, html.a11y-still *::before, html.a11y-still *::after {
+  animation: none !important; transition: none !important; scroll-behavior: auto !important;
+}
+
+/* Accessibility statement page */
+.statement { max-inline-size: 70ch; display: flex; flex-direction: column; gap: 14px; }
+.statement h1 { font-size: var(--step-4); }
+.statement h2 { font-size: var(--step-2); margin-block-start: 14px; }
+.statement p, .statement ul { margin: 0; }
+.statement ul { padding-inline-start: 1.3em; display: flex; flex-direction: column; gap: 6px; }
+.statement .muted { color: var(--muted); }

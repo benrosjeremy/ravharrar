@@ -7,8 +7,10 @@ import { renderHome } from './views/home.js';
 import { renderLibrary } from './views/library.js';
 import { renderGemara } from './views/gemara.js';
 import { renderParasha, renderTopics } from './views/parasha.js';
+import { renderAccessibility } from './views/accessibility.js';
+import { initA11y } from './a11y.js';
 
-const VIEWS = { home: renderHome, library: renderLibrary, gemara: renderGemara, parasha: renderParasha, topics: renderTopics };
+const VIEWS = { home: renderHome, library: renderLibrary, gemara: renderGemara, parasha: renderParasha, topics: renderTopics, accessibility: renderAccessibility };
 const main = document.getElementById('main');
 let lessons = [];
 let byId = new Map();
@@ -18,6 +20,7 @@ let openedInApp = false;     // lesson overlay opened from a page of this site (
 
 function applyStaticText() {
   document.querySelectorAll('[data-i18n]').forEach((n) => { n.textContent = t(n.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-label]').forEach((n) => { n.setAttribute('aria-label', t(n.dataset.i18nLabel)); });
   document.title = `${t('site.title')} · ${t('site.rav')}`;
   const langBtn = document.getElementById('lang-toggle');
   langBtn.textContent = t('lang.switch');
@@ -94,6 +97,7 @@ function measureMasthead() {
 
 async function start() {
   initTheme();
+  initA11y();
   initLinks();
   initPlayer({ minimize });
   // Any element with data-play opens that lesson.

@@ -22,7 +22,7 @@ export function renderGemara(root, { lessons, parts, watched }) {
   const amudBtn = (a) => {
     if (!a.lessons.length) return `<span class="amud" title="${a.daf}">${a.amud === 'a' ? '.' : ':'}</span>`;
     const seen = a.lessons.every((l) => watched.has(l.id));
-    return `<a class="amud amud--has${seen ? ' amud--watched' : ''}" href="#/gemara/${slug}/${a.daf}" aria-pressed="${selected?.daf === a.daf}"
+    return `<a class="amud amud--has${seen ? ' amud--watched' : ''}" href="#/gemara/${slug}/${a.daf}"${selected?.daf === a.daf ? ' aria-current="true"' : ''}
       title="${esc(`${cat.fr} ${a.daf} · ${a.lessons.length}`)}" aria-label="${esc(`${catName(cat)} ${a.daf}`)}">${a.amud === 'a' ? '.' : ':'}</a>`;
   };
 

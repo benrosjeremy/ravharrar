@@ -73,5 +73,16 @@
   "home.inProgress": "המסכת שלומדים עכשיו",
   "home.inProgressLead": "{covered} עמודים נלמדו מתוך {total}. הצטרפו מהמקום שבו השיעור נמצא.",
   "home.openBoard": "למפת הדפים",
-  "home.topics": "הנושאים הנלמדים ביותר"
+  "home.topics": "הנושאים הנלמדים ביותר",
+  "a11y.open": "תפריט נגישות",
+  "a11y.title": "נגישות",
+  "a11y.textSize": "גודל טקסט",
+  "a11y.smaller": "הקטנת טקסט",
+  "a11y.bigger": "הגדלת טקסט",
+  "a11y.contrast": "ניגודיות גבוהה",
+  "a11y.links": "הדגשת קישורים",
+  "a11y.readable": "גופן קריא",
+  "a11y.still": "עצירת אנימציות",
+  "a11y.reset": "איפוס",
+  "a11y.statement": "הצהרת נגישות"
 }

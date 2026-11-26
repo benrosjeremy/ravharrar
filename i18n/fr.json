@@ -73,5 +73,16 @@
   "home.inProgress": "Le traité en cours",
   "home.inProgressLead": "{covered} amoudim déjà étudiés sur {total}. Reprenez là où en est le cours.",
   "home.openBoard": "Ouvrir la carte des dafim",
-  "home.topics": "Sujets les plus étudiés"
+  "home.topics": "Sujets les plus étudiés",
+  "a11y.open": "Menu d'accessibilité",
+  "a11y.title": "Accessibilité",
+  "a11y.textSize": "Taille du texte",
+  "a11y.smaller": "Réduire le texte",
+  "a11y.bigger": "Agrandir le texte",
+  "a11y.contrast": "Contraste élevé",
+  "a11y.links": "Souligner les liens",
+  "a11y.readable": "Police lisible",
+  "a11y.still": "Arrêter les animations",
+  "a11y.reset": "Réinitialiser",
+  "a11y.statement": "Déclaration d'accessibilité"
 }

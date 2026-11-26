@@ -21,7 +21,7 @@ export function renderLibrary(root, { lessons, params, watched, onUrlChange = ()
       <div class="search">
         <label class="sr" for="q" hidden>${esc(t('search.label'))}</label>
         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M10 4a6 6 0 1 0 3.7 10.7l4.8 4.8 1.4-1.4-4.8-4.8A6 6 0 0 0 10 4Zm0 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8Z"/></svg>
-        <input id="q" type="search" autocomplete="off" enterkeyhint="search" aria-label="${esc(t('search.label'))}" placeholder="${esc(t('search.placeholder'))}" value="${esc(q.text)}">
+        <input id="q" type="search" dir="auto" autocomplete="off" enterkeyhint="search" aria-label="${esc(t('search.label'))}" placeholder="${esc(t('search.placeholder'))}" value="${esc(q.text)}">
       </div>
       <div class="filter-row">
         <button type="button" class="seg" data-series="" aria-pressed="${!q.series}">${esc(t('filter.all'))}</button>

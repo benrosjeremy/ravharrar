@@ -4,4 +4,7 @@ export default {
   whatsappUrl: '',
   youtubeUrl: 'https://www.youtube.com/@ravyaacovb.harrar4468',
   facebookUrl: 'https://www.facebook.com/yaacov1',
+  // Accessibility contact shown on the accessibility statement (required by Israeli law).
+  // Fill in at least an email or a phone. Empty fields are not shown.
+  accessibilityContact: { name: '', email: '', phone: '' },
 };

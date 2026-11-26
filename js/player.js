@@ -5,6 +5,7 @@ import { t } from './i18n.js';
 import { categoryBySlug } from '../scripts/lib/taxonomy.js';
 import { catName } from './i18n.js';
 import { displayTitle } from './title.js';
+import { trapTarget } from './a11y.js';
 
 const el = (id) => document.getElementById(id);
 let yt = null;            // YT.Player
@@ -70,11 +71,34 @@ function setMeta(lesson) {
   el('player-close').setAttribute('aria-label', t('action.close'));
 }
 
+// The full player is a modal dialog: the page behind it is inert, focus stays inside,
+// and focus goes back where it was when the dialog closes.
+const BEHIND = () => document.querySelectorAll('body > .skip, body > .masthead, body > main, body > .footer');
+let returnFocus = null;
+
+function setModal(on) {
+  const p = el('player');
+  const was = p.getAttribute('aria-modal') === 'true';
+  if (on) { p.setAttribute('role', 'dialog'); p.setAttribute('aria-modal', 'true'); }
+  else { p.removeAttribute('role'); p.removeAttribute('aria-modal'); }
+  BEHIND().forEach((n) => { n.inert = on; });
+  if (on && !was) {
+    const a = document.activeElement;
+    returnFocus = a && a !== document.body && !p.contains(a) ? a : null;
+  }
+  if (!on && was) {
+    const target = returnFocus?.isConnected ? returnFocus : document.getElementById('main');
+    returnFocus = null;
+    target?.focus({ preventScroll: true });
+  }
+}
+
 export function setMode(mode) {
   const p = el('player');
   p.dataset.mode = mode;
   document.body.classList.toggle('has-mini', mode === 'mini' && !p.hidden);
   el('player-toggle').setAttribute('aria-label', t(mode === 'mini' ? 'action.expand' : 'action.close'));
+  setModal(mode === 'full' && !p.hidden);
   if (mode === 'full') el('player-close').focus({ preventScroll: true });
 }
 
@@ -110,6 +134,7 @@ export function close() {
   try { yt?.stopVideo(); } catch { /* ignore */ }
   el('player').hidden = true;
   document.body.classList.remove('has-mini');
+  setModal(false);
   current = null;
 }
 
@@ -130,7 +155,14 @@ export function initPlayer({ minimize }) {
     }
   });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && isOpen() && el('player').dataset.mode === 'full') onMinimize();
+    const full = isOpen() && el('player').dataset.mode === 'full';
+    if (e.key === 'Escape' && full) onMinimize();
+    if (e.key === 'Tab' && full) {
+      const items = [...el('player').querySelectorAll('.player__box iframe, .player__box a[href], .player__box button')]
+        .filter((n) => !n.disabled && n.getClientRects().length);
+      const i = trapTarget(items.length, items.indexOf(document.activeElement), e.shiftKey);
+      if (i !== null) { e.preventDefault(); items[i].focus(); }
+    }
   });
   window.addEventListener('pagehide', tick);
 }
