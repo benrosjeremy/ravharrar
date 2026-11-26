@@ -1,6 +1,6 @@
 import config from '../config.js';
 import { setLang, initialLang, currentLang, onLangChange, t } from './i18n.js';
-import { onRoute, parseHash } from './router.js';
+import { onRoute, parseHash, leaveLessonAction } from './router.js';
 import { loadState } from './store.js';
 import { initPlayer, play, setMode, isOpen } from './player.js';
 import { renderHome } from './views/home.js';
@@ -14,6 +14,7 @@ let lessons = [];
 let byId = new Map();
 let backgroundHash = '#/';   // the page under the player overlay
 let renderedHash = null;
+let openedInApp = false;     // lesson overlay opened from a page of this site (vs. a shared link)
 
 function applyStaticText() {
   document.querySelectorAll('[data-i18n]').forEach((n) => { n.textContent = t(n.dataset.i18n); });
@@ -30,7 +31,10 @@ function renderView(hash) {
   const route = parseHash(hash);
   const view = VIEWS[route.name] ?? renderHome;
   const state = loadState();
-  view(main, { lessons, byId, parts: route.parts, params: route.params, state, watched: new Set(state.watched) });
+  // A view that rewrites its own URL (library search) reports it, so language switches and
+  // closing the player come back to the same filtered page.
+  const onUrlChange = (h) => { backgroundHash = h; renderedHash = h; };
+  view(main, { lessons, byId, parts: route.parts, params: route.params, state, watched: new Set(state.watched), onUrlChange });
   renderedHash = hash;
   document.querySelectorAll('.nav a').forEach((a) => {
     if (a.dataset.route === (VIEWS[route.name] ? route.name : 'home')) a.setAttribute('aria-current', 'page');
@@ -42,6 +46,7 @@ function handleRoute(route) {
   if (!lessons.length) return;
   if (route.name === 'lesson') {
     const lesson = byId.get(route.parts[0]);
+    openedInApp = renderedHash !== null;
     if (renderedHash === null) renderView(backgroundHash);
     if (lesson) play(lesson, { mode: 'full' });
     else location.replace('#/');
@@ -57,8 +62,11 @@ function handleRoute(route) {
 }
 
 function minimize() {
-  // Leave the lesson route; the page underneath stays as it was.
-  location.hash = backgroundHash;
+  // Leave the lesson route without adding history, so Back never reopens a closed lesson.
+  if (parseHash(location.hash).name !== 'lesson') return;
+  if (leaveLessonAction(openedInApp) === 'back') history.back();
+  else location.replace(backgroundHash);
+  openedInApp = false;
 }
 
 function initTheme() {

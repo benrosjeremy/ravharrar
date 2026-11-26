@@ -7,7 +7,7 @@ import { buildHash } from '../router.js';
 const PAGE = 48;
 const SERIES = ['parasha', 'gemara', 'chag', 'other', 'hebrew'];
 
-export function renderLibrary(root, { lessons, params, watched }) {
+export function renderLibrary(root, { lessons, params, watched, onUrlChange = () => {} }) {
   const q = { text: params.q ?? '', series: params.series ?? '', category: params.cat ?? '', year: params.year ? Number(params.year) : 0 };
   let shown = PAGE;
   const cat = categoryBySlug(q.category);
@@ -41,7 +41,9 @@ export function renderLibrary(root, { lessons, params, watched }) {
   const countEl = root.querySelector('#count');
 
   const sync = () => {
-    history.replaceState(null, '', buildHash('library', [], { q: q.text, series: q.series, cat: q.category, year: q.year || '' }));
+    const h = buildHash('library', [], { q: q.text, series: q.series, cat: q.category, year: q.year || '' });
+    history.replaceState(null, '', h);
+    onUrlChange(h);
   };
 
   const draw = () => {

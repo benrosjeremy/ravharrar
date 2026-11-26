@@ -2,7 +2,9 @@ import { categoryBySlug } from '../scripts/lib/taxonomy.js';
 
 /** Lowercase, no accents or niqqud, single spaces. */
 export function normalize(s) {
-  return String(s ?? '').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/\s+/g, ' ').trim();
+  return String(s ?? '').normalize('NFD').replace(/\p{M}/gu, '')
+    .replace(/[’‘`´׳]/g, "'").replace(/[“”״«»]/g, '"')
+    .toLowerCase().replace(/\s+/g, ' ').trim();
 }
 
 const haystacks = new WeakMap();

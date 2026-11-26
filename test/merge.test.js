@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mergeLessons, shouldWrite } from '../scripts/lib/merge.js';
+import { mergeLessons, shouldWrite, refreshProblem } from '../scripts/lib/merge.js';
 
 const raw = (id, title, publishedAt = '2023-01-01', approx = true) =>
   ({ id, title, durationSec: 600, publishedAt, publishedApprox: approx, thumb: `t/${id}` });
@@ -72,4 +72,21 @@ test('shouldWrite refuses an empty or clearly shrunken result', () => {
   assert.equal(shouldWrite(4700, 4791), false);
   assert.equal(shouldWrite(4787, 4791), true);
   assert.equal(shouldWrite(15, 0), true);
+});
+
+test('a gemara lesson filed in a parasha playlist keeps its tractate and daf (title parse is never overridden)', () => {
+  const [l] = mergeLessons([raw('k', 'Erouvine 62a - Cours de Guemara')], { k: ['ki-tissa'] });
+  assert.deepEqual(l.categories, ['ki-tissa', 'erouvine']);
+  assert.equal(l.masechet, 'erouvine');
+  assert.equal(l.daf, '62a');
+});
+
+test('refreshProblem blocks a refresh that loses lessons, categories or playlists', () => {
+  const mk = (n, mapped) => Array.from({ length: n }, (_, i) => ({ source: i < mapped ? 'map' : 'title' }));
+  assert.equal(refreshProblem({ lessons: mk(100, 95), previous: mk(100, 95), failedPlaylists: [] }), null);
+  assert.match(refreshProblem({ lessons: [], previous: mk(100, 95), failedPlaylists: [] }), /lessons/);
+  assert.match(refreshProblem({ lessons: mk(90, 85), previous: mk(100, 95), failedPlaylists: [] }), /lessons/);
+  assert.match(refreshProblem({ lessons: mk(100, 80), previous: mk(100, 95), failedPlaylists: [] }), /categor/);
+  assert.match(refreshProblem({ lessons: mk(100, 95), previous: mk(100, 95), failedPlaylists: ['PL1'] }), /PL1/);
+  assert.equal(refreshProblem({ lessons: mk(15, 0), previous: [], failedPlaylists: [] }), null);
 });

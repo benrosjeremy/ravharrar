@@ -13,16 +13,43 @@ let current = null;       // lesson
 let timer = null;
 let onMinimize = () => {};
 
+let playerReady = null;   // Promise<YT.Player>, resolved on the player's onReady
+
 function loadApi() {
   if (apiReady) return apiReady;
   apiReady = new Promise((resolve, reject) => {
-    window.onYouTubeIframeAPIReady = () => resolve(window.YT);
+    const timeout = setTimeout(() => { apiReady = null; reject(new Error('YouTube player timed out')); }, 15000);
+    window.onYouTubeIframeAPIReady = () => { clearTimeout(timeout); resolve(window.YT); };
     const s = document.createElement('script');
     s.src = 'https://www.youtube.com/iframe_api';
-    s.onerror = () => { apiReady = null; reject(new Error('YouTube player could not load')); };
+    s.onerror = () => { clearTimeout(timeout); apiReady = null; reject(new Error('YouTube player could not load')); };
     document.head.append(s);
   });
   return apiReady;
+}
+
+/** Create the one player (first call) and resolve once it can take commands. */
+function ensurePlayer(YT, videoId, start) {
+  if (playerReady) return { ready: playerReady, created: false };
+  playerReady = new Promise((resolve) => {
+    yt = new YT.Player('yt-player', {
+      host: 'https://www.youtube-nocookie.com',
+      videoId,
+      playerVars: { start, autoplay: 1, rel: 0, playsinline: 1, modestbranding: 1 },
+      events: {
+        onReady: () => resolve(yt),
+        onStateChange: (e) => {
+          if (e.data === YT.PlayerState.ENDED && current) markWatched(current.id);
+          if (e.data === YT.PlayerState.PAUSED) tick();
+        },
+      },
+    });
+  });
+  return { ready: playerReady, created: true };
+}
+
+function showFallback(lesson) {
+  el('yt-player').outerHTML = `<div id="yt-player" class="player__fallback"><a class="btn" href="https://www.youtube.com/watch?v=${encodeURIComponent(lesson.id)}" target="_blank" rel="noopener">${t('action.openYoutube')}</a></div>`;
 }
 
 function tick() {
@@ -61,29 +88,20 @@ export async function play(lesson, { mode = 'full', startAt } = {}) {
   setMeta(lesson);
   const saved = loadState().last;
   const start = Math.floor(startAt ?? (saved?.id === lesson.id ? saved.position : 0));
+  let YT;
   try {
-    const YT = await loadApi();
-    if (yt) {
-      yt.loadVideoById({ videoId: lesson.id, startSeconds: start });
-    } else {
-      yt = new YT.Player('yt-player', {
-        host: 'https://www.youtube-nocookie.com',
-        videoId: lesson.id,
-        playerVars: { start, autoplay: 1, rel: 0, playsinline: 1, modestbranding: 1 },
-        events: {
-          onStateChange: (e) => {
-            if (e.data === YT.PlayerState.ENDED && current) markWatched(current.id);
-            if (e.data === YT.PlayerState.PAUSED) tick();
-          },
-        },
-      });
-    }
-    clearInterval(timer);
-    timer = setInterval(tick, 5000);
+    YT = await loadApi();
   } catch {
-    // Player blocked (offline, extension): send people to YouTube instead.
-    el('yt-player').outerHTML = `<div id="yt-player" class="player__fallback"><a class="btn" href="https://www.youtube.com/watch?v=${lesson.id}" target="_blank" rel="noopener">${t('action.openYoutube')}</a></div>`;
+    // Player script blocked (offline, extension): send people to YouTube instead.
+    if (!yt) showFallback(lesson);
+    return;
   }
+  const { ready, created } = ensurePlayer(YT, lesson.id, start);
+  await ready;
+  if (current?.id !== lesson.id) return; // a newer play() took over while we waited
+  if (!created) yt.loadVideoById({ videoId: lesson.id, startSeconds: start });
+  clearInterval(timer);
+  timer = setInterval(tick, 5000);
 }
 
 export function close() {

@@ -227,7 +227,11 @@ export async function withRetry(fn, { tries = 3, delayMs = 1500 } = {}) {
 
 /** All video ids of a playlist, in order. YouTube sometimes serves a page without data: retried. */
 export async function fetchPlaylistVideoIds(playlistId) {
-  const first = await withRetry(async () => parsePlaylistPage(await getText(`${BASE}/playlist?list=${playlistId}&hl=${HL}`)));
+  const first = await withRetry(async () => {
+    const page = parsePlaylistPage(await getText(`${BASE}/playlist?list=${playlistId}&hl=${HL}`));
+    if (!page.ids.length) throw new Error('playlist page came back empty');
+    return page;
+  });
   const ids = [...first.ids];
   let token = first.continuation;
   for (let page = 0; token && page < 200; page++) {

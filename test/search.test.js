@@ -46,3 +46,10 @@ test('no match gives an empty list', () => {
 test('yearsOf lists the years that have lessons, newest first', () => {
   assert.deepEqual(yearsOf(lessons), [2026, 2025, 2024]);
 });
+
+test('straight and curly apostrophes, and Hebrew geresh/gershayim, search the same', () => {
+  const ls = [L('x', 'La vie de l’homme'), L('y', "La vie de l'homme"), L('z', 'קידושין נז ע״ב')];
+  assert.deepEqual(filterLessons(ls, { text: "l'homme" }).map((l) => l.id), ['x', 'y']);
+  assert.deepEqual(filterLessons(ls, { text: 'l’homme' }).map((l) => l.id), ['x', 'y']);
+  assert.deepEqual(filterLessons(ls, { text: 'ע"ב' }).map((l) => l.id), ['z']);
+});

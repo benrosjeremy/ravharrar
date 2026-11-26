@@ -15,6 +15,9 @@ function classify(title, mapped) {
   if (mapped?.length) {
     const categories = mapped.filter((s) => categoryBySlug(s));
     if (categories.length) {
+      // A confident daf in the title is never overridden: a gemara lesson filed in a parasha
+      // playlist also joins its tractate, so it shows on the daf map.
+      if (p.masechet && !firstOf(categories, 'gemara')) categories.push(p.masechet);
       const masechet = firstOf(categories, 'gemara');
       return {
         series: categoryBySlug(categories[0]).series,
@@ -69,4 +72,18 @@ export function mergeLessons(raw, oldMap, rss = []) {
 /** Never replace a good data file with an empty or clearly truncated one. */
 export function shouldWrite(newCount, oldCount) {
   return newCount > 0 && newCount >= oldCount - 5;
+}
+
+/**
+ * Why this refresh must not be written, or null when it is safe.
+ * Blocks: unreadable category playlists, lost lessons, or a drop in categorised lessons.
+ */
+export function refreshProblem({ lessons, previous = [], failedPlaylists = [] }) {
+  if (failedPlaylists.length) return `${failedPlaylists.length} category playlist(s) could not be read: ${failedPlaylists.join(', ')}`;
+  if (!shouldWrite(lessons.length, previous.length)) return `got ${lessons.length} lessons, the current file has ${previous.length}`;
+  const mapped = (list) => list.filter((l) => l.source === 'map').length;
+  if (previous.length && mapped(lessons) < mapped(previous) * 0.98) {
+    return `categorised lessons dropped from ${mapped(previous)} to ${mapped(lessons)}`;
+  }
+  return null;
 }

@@ -3,7 +3,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { fetchChannelLessons, fetchRssLessons, fetchPlaylistVideoIds } from './lib/youtube.js';
 import { buildOldMap } from './lib/oldsite.js';
-import { mergeLessons, shouldWrite } from './lib/merge.js';
+import { mergeLessons, refreshProblem } from './lib/merge.js';
 
 const file = (p) => new URL(`../data/${p}`, import.meta.url);
 const fail = (msg) => { console.error(`\nERROR: ${msg}\ndata/videos.json was not changed.`); process.exit(1); };
@@ -24,9 +24,10 @@ try {
   console.log('3/4 Category playlists...');
   const unique = [...new Set(Object.values(playlistsBySlug).flat())];
   const idsByPlaylist = {};
+  const failedPlaylists = [];
   for (let i = 0; i < unique.length; i += 4) {
     await Promise.all(unique.slice(i, i + 4).map(async (pl) => {
-      try { idsByPlaylist[pl] = await fetchPlaylistVideoIds(pl); } catch (e) { console.warn(`    ${pl}: ${e.message}`); }
+      try { idsByPlaylist[pl] = await fetchPlaylistVideoIds(pl); } catch (e) { failedPlaylists.push(pl); console.warn(`    ${pl}: ${e.message}`); }
     }));
   }
   const oldMap = buildOldMap(playlistsBySlug, idsByPlaylist);
@@ -34,8 +35,10 @@ try {
 
   console.log('4/4 Merge...');
   const lessons = mergeLessons([...raw, ...missingFromScrape], oldMap, rss);
-  const oldCount = existsSync(file('videos.json')) ? JSON.parse(readFileSync(file('videos.json'), 'utf8')).length : 0;
-  if (!shouldWrite(lessons.length, oldCount)) fail(`got ${lessons.length} lessons, the current file has ${oldCount}. YouTube may have blocked or changed its pages.`);
+  const previous = existsSync(file('videos.json')) ? JSON.parse(readFileSync(file('videos.json'), 'utf8')) : [];
+  const oldCount = previous.length;
+  const problem = refreshProblem({ lessons, previous, failedPlaylists });
+  if (problem) fail(`${problem}. YouTube may have blocked or changed its pages; try again later.`);
 
   writeFileSync(file('oldsite-map.json'), `${JSON.stringify(oldMap)}\n`);
   writeFileSync(file('videos.json'), `${JSON.stringify(lessons)}\n`);
