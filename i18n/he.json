@@ -62,5 +62,16 @@
   "lang.switch": "Français",
   "lang.switchLabel": "Passer en français",
   "error.data": "לא הצלחנו לטעון את השיעורים. בדקו את החיבור וטענו את הדף מחדש.",
-  "player.title": "נגן"
+  "player.title": "נגן",
+  "home.seeAll": "לכל השיעורים",
+  "action.prev": "הקודמים",
+  "action.next": "הבאים",
+  "home.statLessons": "שיעורים באתר",
+  "home.statGemara": "שיעורי גמרא",
+  "home.statParasha": "שיעורים על הפרשה",
+  "home.statSince": "שיעורים מאז",
+  "home.inProgress": "המסכת שלומדים עכשיו",
+  "home.inProgressLead": "{covered} עמודים נלמדו מתוך {total}. הצטרפו מהמקום שבו השיעור נמצא.",
+  "home.openBoard": "למפת הדפים",
+  "home.topics": "הנושאים הנלמדים ביותר"
 }

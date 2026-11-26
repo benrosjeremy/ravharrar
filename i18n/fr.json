@@ -62,5 +62,16 @@
   "lang.switch": "עברית",
   "lang.switchLabel": "Passer en hébreu",
   "error.data": "Les cours n’ont pas pu être chargés. Vérifiez votre connexion puis rechargez la page.",
-  "player.title": "Lecteur"
+  "player.title": "Lecteur",
+  "home.seeAll": "Tout voir",
+  "action.prev": "Précédents",
+  "action.next": "Suivants",
+  "home.statLessons": "cours en ligne",
+  "home.statGemara": "cours de Guemara",
+  "home.statParasha": "cours sur la paracha",
+  "home.statSince": "des cours depuis",
+  "home.inProgress": "Le traité en cours",
+  "home.inProgressLead": "{covered} amoudim déjà étudiés sur {total}. Reprenez là où en est le cours.",
+  "home.openBoard": "Ouvrir la carte des dafim",
+  "home.topics": "Sujets les plus étudiés"
 }
